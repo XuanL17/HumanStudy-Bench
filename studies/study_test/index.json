@@ -1,0 +1,9 @@
+{
+  "title": "Minimal Test Study",
+  "authors": ["Test Author"],
+  "year": 2026,
+  "description": "Minimal study for testing HumanStudy-Bench submission structure.",
+  "contributors": [
+    { "name": "Test Name", "github": "https://github.com/assassin808" }
+  ]
+}
