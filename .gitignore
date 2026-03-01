@@ -78,6 +78,9 @@ Thumbs.db
 CLAUDE.md
 claude.md
 
+# Next.js
+.next/
+
 # co_website and build artifacts (lite branch)
 co_website/.history/
 co_website/node_modules/

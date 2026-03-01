@@ -14,7 +14,11 @@
 
 ---
 
-> HumanStudy-Bench is a standardized testbed for replaying human-subject experiments with LLM agents. We currently include **12 foundational studies** — and we need your help to grow the benchmark. This repository is the community contribution hub.
+> LLMs are increasingly used to simulate human participants in social science research, but existing evaluations conflate base model capabilities with agent design choices, making it unclear whether results reflect the model or the configuration.
+
+## 👋 Overview
+
+HumanStudy-Bench treats participant simulation as an *agent design problem* and provides a **standardized testbed** — combining an **Execution Engine** that reconstructs full experimental protocols from published studies and a **Benchmark** with standardized evaluation metrics — for *replaying human-subject experiments end-to-end* with alignment evaluation at the level of scientific inference.
 
 ## How to Contribute a Study
 
@@ -88,6 +92,14 @@ If you use HumanStudy-Bench, please cite:
 ```
 
 **Hugging Face:** Benchmark and resources are available on the [Hugging Face Hub](https://huggingface.co/) — `fuyyckwhy/HS-Bench-results`.
+
+## Reproduction (Paper Results)
+
+To test and reproduce the exact benchmark and results reported in our paper, check out the **arXiv-benchmark-version**:
+
+```bash
+git checkout v1.0.0
+```
 
 ## License
 

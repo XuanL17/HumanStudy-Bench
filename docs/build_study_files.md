@@ -50,7 +50,7 @@ A short description at the study root: what the study is, who the participants w
 
 ## source/ — your data, your way
 
-The `source/` directory holds everything extracted from the paper. There's no enforced schema — structure it however makes sense for your study.
+**No required schema or template** — structure it however makes sense for your study.
 
 <details>
 <summary><strong>ground_truth.json</strong> — common convention for findings and statistical results</summary>
@@ -133,7 +133,7 @@ See `studies/study_001/source/materials/` for three real examples.
 
 ## scripts/ — bringing it to life
 
-The `scripts/` directory contains the Python code that runs the replication.
+ **No required template** — implement whatever fits your study.
 
 <details>
 <summary><strong>config.py</strong> — trial generation and prompt building</summary>
