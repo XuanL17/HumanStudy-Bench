@@ -8,7 +8,7 @@ You've extracted the data and built the files. The hard part is over — now you
 
 ### 1. Fork & clone
 
-If you haven't already:
+Fork the [HumanStudy-Bench](https://github.com/AISmithLab/HumanStudy-Bench) repo on GitHub first, then clone your fork. If you haven't already:
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/HumanStudy-Bench.git

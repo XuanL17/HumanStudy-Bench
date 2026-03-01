@@ -1,6 +1,6 @@
 # What Should I Submit?
 
-HumanStudy-Bench is a standardized testbed for replaying human-subject experiments with LLM agents. The 12 foundational studies are just the beginning — and we need your help to grow the benchmark. Every new study you contribute makes the evaluation richer and more honest about what AI can (and can't) replicate.
+HumanStudy-Bench is a standardized testbed for replaying human-subject experiments with LLM agents. The 12 foundational studies are just the beginning — and we need your help to grow the community. Every new study you contribute makes the evaluation richer and more honest about what AI can (and can't) replicate.
 
 The good news? You don't need to run any experiments yourself. You just need to translate an existing published study into a format our system understands. Think of it as turning a paper into a recipe that an AI agent can follow.
 
