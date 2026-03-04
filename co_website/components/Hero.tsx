@@ -15,7 +15,7 @@ export default function Hero() {
             HumanStudy-Bench: Towards AI <span className="text-cyan-600">Agent Design</span> for Participant Simulation
           </h1>
           <p className="mt-6 text-lg leading-8 text-gray-600">
-            A reusable platform converting human study research papers into standardized testbed for AI agents to replay human-subject experiments end-to-end, evaluating agent alignment with human participants at the level of scientific inference.
+            A non-profit and open-source platform converting human study research papers into standardized testbed for AI agents to replay human-subject experiments end-to-end, evaluating agent alignment with human participants at the level of scientific inference.
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3">
             <Link

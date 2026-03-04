@@ -45,6 +45,14 @@ export default function Overview() {
             <div className="text-xs text-gray-600 mt-1">PAS & ECS for alignment</div>
           </div>
         </div>
+        <div className="mt-6 text-center">
+          <a href="/contribute" className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors">
+            Open-ended and growing — join us to add more
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+            </svg>
+          </a>
+        </div>
       </div>
 
        {/* Visual Pipeline Section */}
