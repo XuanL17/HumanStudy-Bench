@@ -37,10 +37,10 @@ export default async function ContributePage() {
           <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
             Add a new study to HumanStudy-Bench.
           </p>
-          <div className="mt-6 mx-auto max-w-2xl rounded-xl border border-indigo-100 bg-indigo-50/40 px-6 py-5 text-sm leading-relaxed text-gray-700 space-y-1.5">
+          <div className="mt-6 mx-auto max-w-2xl rounded-xl border border-cyan-100 bg-cyan-50/40 px-6 py-5 text-sm leading-relaxed text-gray-700 space-y-1.5">
             <p>HumanStudy-Bench is a non-profit and open-source platform.</p>
             <p>We welcome collaborators from all backgrounds!</p>
-            <p>All contributors will be credited in future reports and publications.</p>
+            <p>All accepted contributions will be acknowledged and credited.</p>
           </div>
           {/* Section nav */}
           <div className="mt-8 flex flex-wrap justify-center gap-3">
