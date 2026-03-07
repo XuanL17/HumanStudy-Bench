@@ -6,7 +6,7 @@
     "Boon Chong Lim"
   ],
   "year": 2002,
-  "description": "This study examines how cognitive biases affect entrepreneurs' opportunity evaluation under risky conditions. Using a survey of 77 founders of top SMEs in Singapore, the study measures overconfidence, illusion of control, belief in the law of small numbers, and planning fallacy, and tests how these biases influence risk perception and opportunity evaluation of a standardized business vignette. Results show that illusion of control reduces risk perception, which in turn increases opportunity evaluation (full mediation), while belief in the law of small numbers directly increases opportunity evaluation. Entrepreneurs are found to be significantly overconfident in their knowledge calibration.",
+  "description": "This study examines how cognitive biases affect entrepreneurs' opportunity evaluation under risky conditions. Using a survey of 77 founders of top SMEs in Singapore, the study measures overconfidence, illusion of control, belief in the law of small numbers, and planning fallacy, then relates those constructs to risk perception and opportunity evaluation for a standardized business vignette. The benchmark reproduces the paper's calibration test and its reported regression findings: entrepreneurs are overconfident, risk perception negatively predicts opportunity evaluation, illusion of control lowers risk perception and increases opportunity evaluation before mediation, and belief in the law of small numbers increases opportunity evaluation in the pre-mediation model.",
   "contributors": [
     {
       "name": "Guankai Zhai",

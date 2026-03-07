@@ -1,29 +1,17 @@
 import json
-import re
 import numpy as np
 from scipy import stats
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional, Sequence
 
 import sys
 sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parent))
 from stats_lib import parse_p_value_from_reported
+from study_utils import compute_construct_scores, iter_response_records
 
 # Module-level cache for ground truth and metadata
 _ground_truth_cache = None
 _metadata_cache = None
-
-
-def parse_agent_responses(response_text: str) -> Dict[int, str]:
-    """
-    Parse standardized responses: Qk=Value or Qk: Value
-    Returns dict mapping question number (int) to value string.
-    """
-    parsed = {}
-    matches = re.findall(r"Q(\d+)\s*[:=]\s*([^,\n]+)", response_text)
-    for q_num, val in matches:
-        parsed[int(q_num)] = val.strip()
-    return parsed
 
 
 def _expected_direction_to_int(expected_dir_str: str) -> int:
@@ -38,112 +26,69 @@ def _expected_direction_to_int(expected_dir_str: str) -> int:
     return 0
 
 
-def extract_numeric(text: str, default: float = None):
-    """Extract a numeric value from response text."""
-    if text is None:
-        return default
-    match = re.search(r"(-?\d+\.?\d*)", str(text))
-    return float(match.group(1)) if match else default
+def _select_complete_cases(
+    participant_scores: Sequence[Dict[str, Any]],
+    outcome: str,
+    predictors: Sequence[str],
+) -> Optional[Dict[str, Any]]:
+    """Build complete-case outcome and predictor matrices for OLS."""
+    rows: List[Dict[str, Any]] = []
+    for participant in participant_scores:
+        required_values = [participant.get(outcome)]
+        required_values.extend(participant.get(name) for name in predictors)
+        if any(value is None for value in required_values):
+            continue
+        rows.append(participant)
 
-
-def compute_participant_scores(response_text: str, trial_info: Dict) -> Dict[str, Any]:
-    """
-    Parse a single participant's responses and compute all construct scores.
-    Returns a dict of construct scores, or None if insufficient data.
-    """
-    responses = parse_agent_responses(response_text)
-    items_a = trial_info.get("items_a", [])
-    items_b = trial_info.get("items_b", [])
-    items_c = trial_info.get("items_c", [])
-    items_d = trial_info.get("items_d", [])
-
-    # --- Risk Propensity: count of risky choices (0-5) ---
-    risk_propensity = 0
-    for item in items_a:
-        q_idx = item.get("q_idx")
-        if q_idx and q_idx in responses:
-            choice = responses[q_idx].strip().lower()
-            risky = item.get("metadata", {}).get("risky_option", "a")
-            if choice == risky:
-                risk_propensity += 1
-
-    # --- Planning Fallacy: sum of planning fallacy items ---
-    planning_fallacy = 0
-    pf_count = 0
-    for item in items_b:
-        if item.get("metadata", {}).get("construct") == "planning_fallacy":
-            q_idx = item.get("q_idx")
-            if q_idx and q_idx in responses:
-                val = extract_numeric(responses[q_idx])
-                if val is not None and 1 <= val <= 7:
-                    planning_fallacy += val
-                    pf_count += 1
-
-    # --- Illusion of Control: sum of IoC items ---
-    illusion_of_control = 0
-    ioc_count = 0
-    for item in items_b:
-        if item.get("metadata", {}).get("construct") == "illusion_of_control":
-            q_idx = item.get("q_idx")
-            if q_idx and q_idx in responses:
-                val = extract_numeric(responses[q_idx])
-                if val is not None and 1 <= val <= 7:
-                    illusion_of_control += val
-                    ioc_count += 1
-
-    # --- Overconfidence: items where correct answer outside [lower, upper] ---
-    overconfidence = 0
-    oc_count = 0
-    for item in items_c:
-        q_lower = item.get("q_idx_lower")
-        q_upper = item.get("q_idx_upper")
-        correct = item.get("correct_answer")
-        if q_lower and q_upper and correct is not None:
-            if q_lower in responses and q_upper in responses:
-                try:
-                    lower = float(responses[q_lower])
-                    upper = float(responses[q_upper])
-                    oc_count += 1
-                    if correct < lower or correct > upper:
-                        overconfidence += 1
-                except (ValueError, TypeError):
-                    pass
-
-    # --- Risk Perception: sum of risk perception items ---
-    risk_perception = 0
-    rp_count = 0
-    for item in items_d:
-        if item.get("metadata", {}).get("construct") == "risk_perception":
-            q_idx = item.get("q_idx")
-            if q_idx and q_idx in responses:
-                val = extract_numeric(responses[q_idx])
-                if val is not None and 1 <= val <= 7:
-                    risk_perception += val
-                    rp_count += 1
-
-    # --- Opportunity Evaluation: sum of OE items ---
-    opportunity_evaluation = 0
-    oe_count = 0
-    for item in items_d:
-        if item.get("metadata", {}).get("construct") == "opportunity_evaluation":
-            q_idx = item.get("q_idx")
-            if q_idx and q_idx in responses:
-                val = extract_numeric(responses[q_idx])
-                if val is not None and 1 <= val <= 7:
-                    opportunity_evaluation += val
-                    oe_count += 1
-
-    # Require minimum data completeness
-    if oc_count < 5 or rp_count < 3 or oe_count < 2:
+    if not rows:
         return None
 
+    y = np.array([row[outcome] for row in rows], dtype=float)
+    x = np.array([[row[name] for name in predictors] for row in rows], dtype=float)
+    return {"rows": rows, "y": y, "x": x}
+
+
+def _fit_ols(y: np.ndarray, x: np.ndarray, predictor_names: Sequence[str]) -> Optional[Dict[str, Any]]:
+    """Fit an ordinary least squares model and return coefficients and t-tests."""
+    if y.ndim != 1 or x.ndim != 2:
+        return None
+
+    n_obs, n_predictors = x.shape
+    if n_obs <= n_predictors + 1:
+        return None
+
+    design = np.column_stack([np.ones(n_obs), x])
+    rank = np.linalg.matrix_rank(design)
+    if rank < design.shape[1]:
+        return None
+
+    coefficients, _, _, _ = np.linalg.lstsq(design, y, rcond=None)
+    residuals = y - design @ coefficients
+    dof = n_obs - design.shape[1]
+    if dof <= 0:
+        return None
+
+    mse = float(np.sum(residuals ** 2) / dof)
+    covariance = mse * np.linalg.inv(design.T @ design)
+    standard_errors = np.sqrt(np.diag(covariance))
+    with np.errstate(divide="ignore", invalid="ignore"):
+        t_values = coefficients / standard_errors
+    p_values = 2 * stats.t.sf(np.abs(t_values), dof)
+
+    names = ["intercept", *predictor_names]
+    coefficient_map = {}
+    for index, name in enumerate(names):
+        coefficient_map[name] = {
+            "coefficient": float(coefficients[index]),
+            "standard_error": float(standard_errors[index]),
+            "t_value": float(t_values[index]),
+            "p_value": float(p_values[index]),
+        }
+
     return {
-        "risk_propensity": risk_propensity,
-        "planning_fallacy": planning_fallacy,
-        "illusion_of_control": illusion_of_control,
-        "overconfidence": overconfidence,
-        "risk_perception": risk_perception,
-        "opportunity_evaluation": opportunity_evaluation,
+        "n_obs": n_obs,
+        "degrees_of_freedom": dof,
+        "coefficients": coefficient_map,
     }
 
 
@@ -171,19 +116,16 @@ def evaluate_study(results):
             _metadata_cache = {}
 
     ground_truth = _ground_truth_cache
-    sig_level = 0.05
-
     # 2. Parse all agent responses into participant score vectors
     participant_scores = []
 
-    for participant in results.get("individual_data", []):
-        for response in participant.get("responses", []):
-            response_text = response.get("response_text", "")
-            trial_info = response.get("trial_info", {})
-
-            scores = compute_participant_scores(response_text, trial_info)
-            if scores is not None:
-                participant_scores.append(scores)
+    for response_record in iter_response_records(results):
+        scores = compute_construct_scores(
+            response_record.get("response_text", ""),
+            response_record.get("trial_info", {}),
+        )
+        if scores is not None:
+            participant_scores.append(scores)
 
     # 3. Build test results for each finding
     test_results = []
@@ -193,21 +135,15 @@ def evaluate_study(results):
         for study_gt in ground_truth.get("studies", []):
             for finding in study_gt.get("findings", []):
                 test_results.append({
-                    "study_id": "keh_foo_lim_opportunity_evaluation",
+                    "study_id": "study_013",
+                    "sub_study_id": "keh_foo_lim_opportunity_evaluation",
                     "finding_id": finding["finding_id"],
                     "n_agent": 0,
                     "error": "No valid participant data",
                 })
         return {"test_results": test_results}
 
-    # Extract score arrays
-    overconfidence_scores = np.array([p["overconfidence"] for p in participant_scores])
-    risk_perception_scores = np.array([p["risk_perception"] for p in participant_scores])
-    opp_eval_scores = np.array([p["opportunity_evaluation"] for p in participant_scores])
-    ioc_scores = np.array([p["illusion_of_control"] for p in participant_scores])
-    planning_scores = np.array([p["planning_fallacy"] for p in participant_scores])
-    risk_prop_scores = np.array([p["risk_propensity"] for p in participant_scores])
-
+    overconfidence_scores = np.array([p["overconfidence"] for p in participant_scores], dtype=float)
     n_agent = len(participant_scores)
 
     for study_gt in ground_truth.get("studies", []):
@@ -218,6 +154,7 @@ def evaluate_study(results):
             expected_dir_str = test_gt.get("expected_direction", "")
             h_expected = _expected_direction_to_int(expected_dir_str)
             reported_stats = test_gt.get("reported_statistics", "")
+            sig_level = test_gt.get("significance_level") or 0.05
 
             # Parse human p-value
             human_p_value = None
@@ -234,6 +171,12 @@ def evaluate_study(results):
             direction_match = None
             mean_agent = None
             sd_agent = None
+            coefficient_agent = None
+            standard_error_agent = None
+            model_n = n_agent
+            model_predictors = None
+            human_coefficient = test_gt.get("reported_coefficient")
+            human_t_value = test_gt.get("reported_t_value")
 
             if finding_id == "F1":
                 # Overconfidence: one-sample t-test against baseline of 1
@@ -258,27 +201,61 @@ def evaluate_study(results):
                     agent_significant = p_value < sig_level
                     direction_match = (mean_agent > baseline)
 
-            elif finding_id in ("F2", "F3", "F4", "F5"):
-                # Correlation-based findings
-                corr_pairs = {
-                    "F2": (risk_perception_scores, opp_eval_scores),
-                    "F3": (ioc_scores, risk_perception_scores),
-                    "F4": (ioc_scores, opp_eval_scores),
-                    "F5": (overconfidence_scores, opp_eval_scores),
-                }
-                x_arr, y_arr = corr_pairs[finding_id]
-
-                # Require sufficient data and non-constant arrays
-                if (len(x_arr) >= 3 and
-                    np.std(x_arr) > 0 and np.std(y_arr) > 0):
-                    r_val, p_val = stats.pearsonr(x_arr, y_arr)
-                    if not np.isnan(r_val):
-                        r_stat = float(r_val)
-                        p_value = float(p_val)
-                        mean_agent = r_stat
+            elif finding_id == "F2":
+                model_predictors = ["risk_perception"]
+                model_data = _select_complete_cases(
+                    participant_scores,
+                    outcome="opportunity_evaluation",
+                    predictors=model_predictors,
+                )
+                if model_data is not None:
+                    model = _fit_ols(model_data["y"], model_data["x"], model_predictors)
+                    if model is not None:
+                        model_n = model["n_obs"]
+                        coefficient = model["coefficients"]["risk_perception"]
+                        coefficient_agent = coefficient["coefficient"]
+                        standard_error_agent = coefficient["standard_error"]
+                        t_stat = coefficient["t_value"]
+                        p_value = coefficient["p_value"]
                         agent_significant = p_value < sig_level
-                        agent_dir = 1 if r_stat > 0 else -1
-                        direction_match = (h_expected == 0) or (agent_dir == h_expected)
+                        direction_match = (coefficient_agent < 0) if h_expected == -1 else (coefficient_agent > 0)
+
+            elif finding_id in ("F3", "F4", "F5"):
+                model_predictors = [
+                    "overconfidence",
+                    "small_numbers",
+                    "planning_fallacy",
+                    "illusion_of_control",
+                    "risk_propensity",
+                    "age",
+                ]
+                target_variable = {
+                    "F3": ("risk_perception", "illusion_of_control"),
+                    "F4": ("opportunity_evaluation", "illusion_of_control"),
+                    "F5": ("opportunity_evaluation", "small_numbers"),
+                }
+                outcome_name, predictor_of_interest = target_variable[finding_id]
+                model_data = _select_complete_cases(
+                    participant_scores,
+                    outcome=outcome_name,
+                    predictors=model_predictors,
+                )
+                if model_data is not None:
+                    model = _fit_ols(model_data["y"], model_data["x"], model_predictors)
+                    if model is not None:
+                        model_n = model["n_obs"]
+                        coefficient = model["coefficients"][predictor_of_interest]
+                        coefficient_agent = coefficient["coefficient"]
+                        standard_error_agent = coefficient["standard_error"]
+                        t_stat = coefficient["t_value"]
+                        p_value = coefficient["p_value"]
+                        agent_significant = p_value < sig_level
+                        if h_expected == -1:
+                            direction_match = coefficient_agent < 0
+                        elif h_expected == 1:
+                            direction_match = coefficient_agent > 0
+                        else:
+                            direction_match = True
 
             # Compute replication metric
             replication = None
@@ -286,12 +263,18 @@ def evaluate_study(results):
                 replication = human_significant and agent_significant and direction_match
 
             test_result = {
-                "study_id": "keh_foo_lim_opportunity_evaluation",
+                "study_id": "study_013",
                 "sub_study_id": "keh_foo_lim_opportunity_evaluation",
                 "finding_id": finding_id,
                 "n_agent": n_agent,
+                "model_n": model_n,
+                "model_predictors": model_predictors,
                 "mean_agent": mean_agent,
                 "sd_agent": sd_agent,
+                "coefficient_agent": coefficient_agent,
+                "standard_error_agent": standard_error_agent,
+                "human_coefficient": human_coefficient,
+                "human_t_value": human_t_value,
                 "t_stat": t_stat,
                 "r_stat": r_stat,
                 "p_value": float(p_value) if p_value is not None else None,

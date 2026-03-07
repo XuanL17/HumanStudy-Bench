@@ -73,8 +73,8 @@
       "type": "open_ended",
       "metadata": {
         "construct": "belief_in_small_numbers",
-        "coding_scheme": "Responses mentioning need for market research, larger sample, statistical data, or survey indicate statistical reasoning (coded -1). Responses not mentioning these indicate reliance on small numbers (coded +1).",
-        "note": "Approximately 50% missingness in original data; used for belief in small numbers construct"
+        "coding_scheme": "Responses requesting broader evidence such as market research, larger samples, statistical data, or surveys indicate statistical reasoning (coded -1). Responses that rely on the vignette as sufficient, including statements that no additional information is needed, indicate belief in the law of small numbers (coded +1).",
+        "note": "This item is optional in the prompt. Blank or explicitly skipped responses are treated as missing during scoring; 'no additional information needed' is a substantive response and should not be treated as missing."
       }
     }
   ]

@@ -1,5 +1,5 @@
 {
-  "study_id": "keh_foo_lim_opportunity_evaluation",
+  "study_id": "study_013",
   "title": "Opportunity Evaluation under Risky Conditions: The Cognitive Processes of Entrepreneurs",
   "participants": {
     "n": 77,
@@ -12,13 +12,12 @@
       "ownership": {"founded": 0.79, "bought_over": 0.21},
       "business_size": {"less_than_1m": 0.028, "1m_to_25m": 0.486, "25m_to_50m": 0.444, "more_than_50m": 0.042}
     },
-    "by_sub_study": [
-      {
-        "sub_study_id": "keh_foo_lim_opportunity_evaluation",
+    "by_sub_study": {
+      "keh_foo_lim_opportunity_evaluation": {
         "n": 77,
-        "description": "All participants completed the same questionnaire (Sections A-E)"
+        "description": "All participants completed the same questionnaire (Sections A-E)."
       }
-    ]
+    }
   },
   "design": {
     "type": "Cross-Sectional Survey",
@@ -41,7 +40,7 @@
       {
         "name": "Belief in Small Numbers",
         "type": "measured",
-        "description": "Coded from open-ended responses about a business case vignette"
+        "description": "Coded from the open-ended vignette response: asking for broader market evidence indicates statistical reasoning, while relying on the vignette's limited anecdotal cues indicates belief in the law of small numbers"
       },
       {
         "name": "Risk Propensity",

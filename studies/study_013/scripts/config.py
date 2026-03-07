@@ -1,28 +1,26 @@
-import json
-import re
 import numpy as np
-from scipy import stats
-from pathlib import Path
-from typing import Dict, Any, List, Optional
 
 import sys
 sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parent))
-from study_utils import BaseStudyConfig, PromptBuilder
+from study_utils import BaseStudyConfig, PromptBuilder, compute_construct_scores, iter_response_records
 
 import random
 
-
-# Demographics distributions from Table 2 for persona generation
-INDUSTRIES = [
-    "Retail", "Manufacturing", "Wholesale", "Construction",
-    "Transportation and Communication", "Financial", "Professional"
-]
 
 AGE_DISTRIBUTION = [
     (range(30, 40), 0.222),   # Less than 40
     (range(40, 61), 0.715),   # 40 to 60
     (range(61, 70), 0.063),   # More than 60
 ]
+
+SEX_OPTIONS = ["male", "female"]
+SEX_WEIGHTS = [0.97, 0.03]
+
+RACE_OPTIONS = ["Chinese", "Indian", "Other"]
+RACE_WEIGHTS = [0.924, 0.045, 0.031]
+
+EDUCATION_OPTIONS = ["secondary", "postsecondary", "primary/other"]
+EDUCATION_WEIGHTS = [0.061, 0.864, 0.075]
 
 BUSINESS_SIZE_OPTIONS = [
     "Less than S$1m",
@@ -45,11 +43,16 @@ def weighted_age_sample():
     return random.randint(40, 60)
 
 
+def weighted_choice(options, weights):
+    """Draw one option according to the reported sample proportions."""
+    return random.choices(options, weights=weights, k=1)[0]
+
+
 class CustomPromptBuilder(PromptBuilder):
     """Builds the full Keh, Foo & Lim (2002) questionnaire prompt."""
 
     def build_trial_prompt(self, trial_metadata):
-        profile = trial_metadata.get("profile", {})
+        profile = trial_metadata.get("profile") or trial_metadata.get("participant_profile", {})
         items_a = trial_metadata.get("items_a", [])
         items_b = trial_metadata.get("items_b", [])
         items_c = trial_metadata.get("items_c", [])
@@ -57,17 +60,26 @@ class CustomPromptBuilder(PromptBuilder):
         vignette_text = trial_metadata.get("vignette_text", "")
 
         lines = []
+        optional_question_numbers = []
 
         # --- Persona Introduction ---
-        age = profile.get("age", 48)
-        industry = profile.get("industry", "Manufacturing")
+        age = profile.get("age", 47)
+        sex = profile.get("sex", "male")
+        race = profile.get("race", "Chinese")
+        education = profile.get("education", "postsecondary")
         business_size = profile.get("business_size", "Between S$1m and S$25m")
-        years_exp = profile.get("years_experience", 15)
         founder = profile.get("is_founder", True)
 
         lines.append("You are participating in a research study on entrepreneurial decision-making.")
-        lines.append(f"Imagine you are a {age}-year-old entrepreneur in Singapore who {'founded' if founder else 'acquired'} a {industry.lower()} business (annual revenue: {business_size}). You have {years_exp} years of business experience.")
-        lines.append("Please answer all questions honestly based on your perspective as a business owner.\n")
+        lines.append(
+            "Answer as one of the Singapore SME founders/owners described in the original paper."
+        )
+        lines.append(
+            f"Imagine you are a {age}-year-old {sex} entrepreneur in Singapore, "
+            f"{race}, with {education} education, who {'founded' if founder else 'bought over'} "
+            f"the business you run (annual revenue: {business_size})."
+        )
+        lines.append("Please answer all questions honestly from that participant's perspective.\n")
 
         q_counter = 1
 
@@ -133,8 +145,11 @@ class CustomPromptBuilder(PromptBuilder):
                 q_counter += 1
             elif item["type"] == "open_ended":
                 lines.append(f"Q{q_counter}: {item['question']}")
-                lines.append(f"  (Answer Q{q_counter}=<your brief response>)\n")
+                lines.append("  Focus on the issues that actually drive your judgment from the case as written.")
+                lines.append("  Mention extra information only if you genuinely need it.")
+                lines.append(f"  (Optional. Answer Q{q_counter}=<brief response>, write Q{q_counter}=No additional information needed, or omit Q{q_counter} to skip.)\n")
                 item["q_idx"] = q_counter
+                optional_question_numbers.append(q_counter)
                 q_counter += 1
 
         # --- Response format ---
@@ -143,7 +158,17 @@ class CustomPromptBuilder(PromptBuilder):
         lines.append("=" * 60)
         lines.append("Output ONLY answer lines in the format: Qk=<value>")
         lines.append("One answer per line. Do not include explanations.")
-        lines.append(f"Expected number of answer lines: {q_counter - 1}")
+        if optional_question_numbers:
+            optional_labels = ", ".join(f"Q{idx}" for idx in optional_question_numbers)
+            required_answers = (q_counter - 1) - len(optional_question_numbers)
+            lines.append(f"All numbered items except {optional_labels} are required.")
+            lines.append(
+                f"For {optional_labels}, respond with the issues influencing your judgment, "
+                "or state that no additional information is needed."
+            )
+            lines.append(f"Expected number of answer lines: {required_answers} to {q_counter - 1}")
+        else:
+            lines.append(f"Expected number of answer lines: {q_counter - 1}")
 
         return "\n".join(lines)
 
@@ -168,18 +193,20 @@ class StudyStudy013Config(BaseStudyConfig):
 
         trials = []
         for i in range(n):
-            # Generate randomized entrepreneur profile from Table 2 demographics
+            # Generate entrepreneur profiles only from demographics reported in Table 2.
             age = weighted_age_sample()
-            industry = random.choice(INDUSTRIES)
+            sex = weighted_choice(SEX_OPTIONS, SEX_WEIGHTS)
+            race = weighted_choice(RACE_OPTIONS, RACE_WEIGHTS)
+            education = weighted_choice(EDUCATION_OPTIONS, EDUCATION_WEIGHTS)
             business_size = random.choices(BUSINESS_SIZE_OPTIONS, weights=BUSINESS_SIZE_WEIGHTS, k=1)[0]
-            years_exp = max(3, age - random.randint(22, 30))
             is_founder = random.random() < 0.79
 
             profile = {
                 "age": age,
-                "industry": industry,
+                "sex": sex,
+                "race": race,
+                "education": education,
                 "business_size": business_size,
-                "years_experience": years_exp,
                 "is_founder": is_founder,
             }
 
@@ -205,124 +232,37 @@ class StudyStudy013Config(BaseStudyConfig):
         """Parse Qk=value responses and compute per-participant construct scores."""
         participants = []
 
-        for record in raw_results.get("individual_data", []):
-            trial_info = record.get("trial_info", {})
-            response_text = record.get("response_text", "")
-
-            # Parse Qk=Value
-            responses = {}
-            for line in response_text.split("\n"):
-                match = re.match(r"Q(\d+)\s*[:=]\s*(.+)", line.strip())
-                if match:
-                    q_num = int(match.group(1))
-                    responses[q_num] = match.group(2).strip()
-
-            items_a = trial_info.get("items_a", [])
-            items_b = trial_info.get("items_b", [])
-            items_c = trial_info.get("items_c", [])
-            items_d = trial_info.get("items_d", [])
-
-            # --- Risk Propensity: count of risky choices (0-5) ---
-            risk_propensity = 0
-            for item in items_a:
-                q_idx = item.get("q_idx")
-                if q_idx and q_idx in responses:
-                    choice = responses[q_idx].strip().lower()
-                    risky = item.get("metadata", {}).get("risky_option", "a")
-                    if choice == risky:
-                        risk_propensity += 1
-
-            # --- Planning Fallacy: sum of B3 + B4 ---
-            planning_fallacy = 0
-            planning_count = 0
-            for item in items_b:
-                if item.get("metadata", {}).get("construct") == "planning_fallacy":
-                    q_idx = item.get("q_idx")
-                    if q_idx and q_idx in responses:
-                        val = self.extract_numeric(responses[q_idx])
-                        if 1 <= val <= 7:
-                            planning_fallacy += val
-                            planning_count += 1
-
-            # --- Illusion of Control: sum of B5 + B6 + B7 ---
-            illusion_of_control = 0
-            ioc_count = 0
-            for item in items_b:
-                if item.get("metadata", {}).get("construct") == "illusion_of_control":
-                    q_idx = item.get("q_idx")
-                    if q_idx and q_idx in responses:
-                        val = self.extract_numeric(responses[q_idx])
-                        if 1 <= val <= 7:
-                            illusion_of_control += val
-                            ioc_count += 1
-
-            # --- Overconfidence: count of items where correct answer is outside [lower, upper] ---
-            overconfidence = 0
-            oc_count = 0
-            for item in items_c:
-                q_lower = item.get("q_idx_lower")
-                q_upper = item.get("q_idx_upper")
-                correct = item.get("correct_answer")
-                if q_lower and q_upper and correct is not None:
-                    if q_lower in responses and q_upper in responses:
-                        try:
-                            lower = float(responses[q_lower])
-                            upper = float(responses[q_upper])
-                            oc_count += 1
-                            if correct < lower or correct > upper:
-                                overconfidence += 1
-                        except (ValueError, TypeError):
-                            pass
-
-            # --- Risk Perception: sum of D1 + D2 + D3 + D4 ---
-            risk_perception = 0
-            rp_count = 0
-            for item in items_d:
-                if item.get("metadata", {}).get("construct") == "risk_perception":
-                    q_idx = item.get("q_idx")
-                    if q_idx and q_idx in responses:
-                        val = self.extract_numeric(responses[q_idx])
-                        if 1 <= val <= 7:
-                            risk_perception += val
-                            rp_count += 1
-
-            # --- Opportunity Evaluation: sum of D5 + D6 + D7 ---
-            opportunity_evaluation = 0
-            oe_count = 0
-            for item in items_d:
-                if item.get("metadata", {}).get("construct") == "opportunity_evaluation":
-                    q_idx = item.get("q_idx")
-                    if q_idx and q_idx in responses:
-                        val = self.extract_numeric(responses[q_idx])
-                        if 1 <= val <= 7:
-                            opportunity_evaluation += val
-                            oe_count += 1
-
-            # Only include participant if they have sufficient data
-            if oc_count >= 5 and rp_count >= 3 and oe_count >= 2:
-                participants.append({
-                    "risk_propensity": risk_propensity,
-                    "planning_fallacy": planning_fallacy,
-                    "illusion_of_control": illusion_of_control,
-                    "overconfidence": overconfidence,
-                    "risk_perception": risk_perception,
-                    "opportunity_evaluation": opportunity_evaluation,
-                    "profile": trial_info.get("profile", {}),
-                })
+        for record in iter_response_records(raw_results):
+            participant_scores = compute_construct_scores(
+                record.get("response_text", ""),
+                record.get("trial_info", {}),
+            )
+            if participant_scores is not None:
+                participants.append(participant_scores)
 
         # Compute descriptive statistics
         if not participants:
             return {"participants": [], "descriptive_statistics": {}, "n_valid": 0}
 
-        constructs = ["risk_propensity", "planning_fallacy", "illusion_of_control",
-                       "overconfidence", "risk_perception", "opportunity_evaluation"]
+        constructs = [
+            "risk_propensity",
+            "planning_fallacy",
+            "illusion_of_control",
+            "overconfidence",
+            "risk_perception",
+            "opportunity_evaluation",
+            "small_numbers",
+            "age",
+        ]
 
         desc_stats = {}
         for c in constructs:
-            values = [p[c] for p in participants]
+            values = [p[c] for p in participants if p.get(c) is not None]
+            if not values:
+                continue
             desc_stats[c] = {
                 "mean": float(np.mean(values)),
-                "sd": float(np.std(values, ddof=1)),
+                "sd": float(np.std(values, ddof=1)) if len(values) > 1 else 0.0,
                 "n": len(values),
             }
 

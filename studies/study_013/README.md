@@ -8,7 +8,7 @@
 
 ## Description
 
-This study examines how cognitive biases affect entrepreneurs' opportunity evaluation under risky conditions. Using a survey of 77 founders of top SMEs in Singapore, the study measures four cognitive biases (overconfidence, illusion of control, belief in the law of small numbers, and planning fallacy) and tests how they influence risk perception and opportunity evaluation of a standardized business case vignette.
+This study examines how cognitive biases affect entrepreneurs' opportunity evaluation under risky conditions. Using a survey of 77 founders of top SMEs in Singapore, the study measures four cognitive biases (overconfidence, illusion of control, belief in the law of small numbers, and planning fallacy) and tests how they influence risk perception and opportunity evaluation of a standardized business case vignette. The benchmark implementation focuses on the paper's calibration test and its reported regression findings.
 
 ## Participants
 
@@ -22,17 +22,17 @@ This study examines how cognitive biases affect entrepreneurs' opportunity evalu
 | Finding | Hypothesis | Human Result |
 |---------|-----------|--------------|
 | F1 | Entrepreneurs are overconfident (mean items outside 90% CI > 1) | Mean = 5.17, SD = 2.64 |
-| F2 | Risk perception negatively associated with opportunity evaluation | r = -.58, p < .01 |
-| F3 | Illusion of control negatively associated with risk perception | r = -.44, p < .01 |
-| F4 | Illusion of control positively associated with opportunity evaluation | r = .34, p < .01 |
-| F5 | Overconfidence positively associated with opportunity evaluation | r = .30, p < .05 |
+| F2 | Risk perception negatively predicts opportunity evaluation (H1) | beta = -0.50, t = -5.98, p < .001 |
+| F3 | Illusion of control negatively predicts risk perception in Model 1 (H5) | beta = -0.76, t = -3.34, p < .01 |
+| F4 | Illusion of control positively predicts opportunity evaluation in Model 2 | beta = 0.40, t = 2.23, p < .05 |
+| F5 | Belief in the law of small numbers positively predicts opportunity evaluation in Model 2 | beta = 1.17, t = 1.91, p < .06 |
 
 ## Questionnaire Structure
 
 - **Section A:** 5 forced-choice gamble items (risk propensity)
 - **Section B:** 7 Likert items (2 filler, 2 planning fallacy, 3 illusion of control)
 - **Section C:** 10 confidence-interval estimation items (overconfidence)
-- **Section D:** Business case vignette + 4 risk perception items + 3 opportunity evaluation items + 1 open-ended item
+- **Section D:** Business case vignette + 4 risk perception items + 3 opportunity evaluation items + 1 optional open-ended item coded for belief in the law of small numbers
 
 ## File Structure
 
