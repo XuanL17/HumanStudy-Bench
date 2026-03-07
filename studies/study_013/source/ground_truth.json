@@ -1,0 +1,162 @@
+{
+  "study_id": "keh_foo_lim_opportunity_evaluation",
+  "title": "Opportunity Evaluation under Risky Conditions: The Cognitive Processes of Entrepreneurs",
+  "authors": ["Hean Tat Keh", "Maw Der Foo", "Boon Chong Lim"],
+  "year": 2002,
+  "studies": [
+    {
+      "study_id": "keh_foo_lim_opportunity_evaluation",
+      "study_name": "Cognitive Biases and Opportunity Evaluation",
+      "findings": [
+        {
+          "finding_id": "F1",
+          "main_hypothesis": "Entrepreneurs are overconfident: the mean number of confidence-interval items where the correct answer falls outside the stated 90% range is significantly greater than 1 (the calibrated baseline).",
+          "statistical_tests": [
+            {
+              "test_name": "One-sample t-test (overconfidence score vs. calibrated baseline of 1)",
+              "statistical_hypothesis": "Mean overconfidence score (number of items outside 90% CI out of 10) > 1",
+              "reported_statistics": "Mean = 5.17, SD = 2.64, N = 77",
+              "significance_level": 0.05,
+              "expected_direction": "positive"
+            }
+          ],
+          "original_data_points": {
+            "description": "Overconfidence scores from Table 3",
+            "data": {
+              "overconfidence": {
+                "mean": 5.17,
+                "sd": 2.64,
+                "n": 77,
+                "baseline": 1,
+                "note": "Number of items (out of 10) where correct answer fell outside stated 90% confidence interval. A perfectly calibrated respondent would have a score of 1."
+              }
+            }
+          }
+        },
+        {
+          "finding_id": "F2",
+          "main_hypothesis": "Risk perception is negatively associated with opportunity evaluation (H1).",
+          "statistical_tests": [
+            {
+              "test_name": "Pearson correlation (risk_perception, opportunity_evaluation)",
+              "statistical_hypothesis": "r(risk_perception, opportunity_evaluation) < 0",
+              "reported_statistics": "r = -.58, p < .01 (Table 3); beta = -0.50, t = -5.98, p < .001 (Table 4, H1)",
+              "significance_level": 0.05,
+              "expected_direction": "negative"
+            }
+          ],
+          "original_data_points": {
+            "description": "Correlation and regression statistics from Tables 3 and 4",
+            "data": {
+              "risk_perception": {
+                "mean": 19.04,
+                "sd": 4.92,
+                "n": 77
+              },
+              "opportunity_evaluation": {
+                "mean": 12.97,
+                "sd": 4.10,
+                "n": 77
+              },
+              "correlation": -0.58,
+              "regression_beta": -0.50,
+              "regression_t": -5.98,
+              "regression_R2": 0.36
+            }
+          }
+        },
+        {
+          "finding_id": "F3",
+          "main_hypothesis": "Illusion of control is negatively associated with risk perception (H5).",
+          "statistical_tests": [
+            {
+              "test_name": "Pearson correlation (illusion_of_control, risk_perception)",
+              "statistical_hypothesis": "r(illusion_of_control, risk_perception) < 0",
+              "reported_statistics": "r = -.44, p < .01 (Table 3); beta = -0.76, t = -3.34, p < .01 (Table 4, Model 1)",
+              "significance_level": 0.05,
+              "expected_direction": "negative"
+            }
+          ],
+          "original_data_points": {
+            "description": "Correlation and regression statistics from Tables 3 and 4",
+            "data": {
+              "illusion_of_control": {
+                "mean": 12.94,
+                "sd": 3.29,
+                "n": 77
+              },
+              "risk_perception": {
+                "mean": 19.04,
+                "sd": 4.92,
+                "n": 77
+              },
+              "correlation": -0.44,
+              "regression_beta": -0.76,
+              "regression_t": -3.34
+            }
+          }
+        },
+        {
+          "finding_id": "F4",
+          "main_hypothesis": "Illusion of control is positively associated with opportunity evaluation.",
+          "statistical_tests": [
+            {
+              "test_name": "Pearson correlation (illusion_of_control, opportunity_evaluation)",
+              "statistical_hypothesis": "r(illusion_of_control, opportunity_evaluation) > 0",
+              "reported_statistics": "r = .34, p < .01 (Table 3); beta = 0.40, t = 2.23, p < .05 (Table 4, Model 2)",
+              "significance_level": 0.05,
+              "expected_direction": "positive"
+            }
+          ],
+          "original_data_points": {
+            "description": "Correlation and regression statistics from Tables 3 and 4",
+            "data": {
+              "illusion_of_control": {
+                "mean": 12.94,
+                "sd": 3.29,
+                "n": 77
+              },
+              "opportunity_evaluation": {
+                "mean": 12.97,
+                "sd": 4.10,
+                "n": 77
+              },
+              "correlation": 0.34,
+              "regression_beta": 0.40,
+              "regression_t": 2.23
+            }
+          }
+        },
+        {
+          "finding_id": "F5",
+          "main_hypothesis": "Overconfidence is positively associated with opportunity evaluation.",
+          "statistical_tests": [
+            {
+              "test_name": "Pearson correlation (overconfidence, opportunity_evaluation)",
+              "statistical_hypothesis": "r(overconfidence, opportunity_evaluation) > 0",
+              "reported_statistics": "r = .30, p < .05 (Table 3)",
+              "significance_level": 0.05,
+              "expected_direction": "positive"
+            }
+          ],
+          "original_data_points": {
+            "description": "Correlation statistics from Table 3",
+            "data": {
+              "overconfidence": {
+                "mean": 5.17,
+                "sd": 2.64,
+                "n": 77
+              },
+              "opportunity_evaluation": {
+                "mean": 12.97,
+                "sd": 4.10,
+                "n": 77
+              },
+              "correlation": 0.30
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "id": "study_013",
+  "title": "Opportunity Evaluation under Risky Conditions: The Cognitive Processes of Entrepreneurs",
+  "authors": [
+    "Hean Tat Keh",
+    "Maw Der Foo",
+    "Boon Chong Lim"
+  ],
+  "year": 2002,
+  "domain": "entrepreneurship",
+  "subdomain": "entrepreneurial_cognition",
+  "keywords": [
+    "overconfidence",
+    "illusion_of_control",
+    "planning_fallacy",
+    "belief_in_small_numbers",
+    "opportunity_evaluation",
+    "risk_perception",
+    "cognitive_biases",
+    "entrepreneurship",
+    "heuristics"
+  ],
+  "difficulty": "medium",
+  "description": "This study examines how cognitive biases (overconfidence, illusion of control, belief in the law of small numbers, planning fallacy) affect entrepreneurs' opportunity evaluation under risky conditions. Using a mediation framework, the study tests whether risk perception mediates the relationship between cognitive biases and opportunity evaluation. Data from 77 Singaporean SME founders show that illusion of control negatively affects risk perception, which in turn negatively affects opportunity evaluation (full mediation). Belief in small numbers directly increases opportunity evaluation. Entrepreneurs are significantly overconfident in their knowledge calibration.",
+  "scenarios": [
+    "keh_foo_lim_opportunity_evaluation"
+  ],
+  "findings": [
+    {
+      "finding_id": "F1",
+      "main_hypothesis": "Entrepreneurs are overconfident: the mean number of confidence-interval items where the correct answer falls outside the stated 90% range is significantly greater than 1 (the calibrated baseline).",
+      "weight": 1.0,
+      "tests": [
+        {
+          "test_name": "One-sample t-test (overconfidence score vs. calibrated baseline of 1)",
+          "weight": 1.0
+        }
+      ]
+    },
+    {
+      "finding_id": "F2",
+      "main_hypothesis": "Risk perception is negatively associated with opportunity evaluation (H1).",
+      "weight": 1.0,
+      "tests": [
+        {
+          "test_name": "Pearson correlation (risk_perception, opportunity_evaluation)",
+          "weight": 1.0
+        }
+      ]
+    },
+    {
+      "finding_id": "F3",
+      "main_hypothesis": "Illusion of control is negatively associated with risk perception (H5).",
+      "weight": 1.0,
+      "tests": [
+        {
+          "test_name": "Pearson correlation (illusion_of_control, risk_perception)",
+          "weight": 1.0
+        }
+      ]
+    },
+    {
+      "finding_id": "F4",
+      "main_hypothesis": "Illusion of control is positively associated with opportunity evaluation.",
+      "weight": 1.0,
+      "tests": [
+        {
+          "test_name": "Pearson correlation (illusion_of_control, opportunity_evaluation)",
+          "weight": 1.0
+        }
+      ]
+    },
+    {
+      "finding_id": "F5",
+      "main_hypothesis": "Overconfidence is positively associated with opportunity evaluation.",
+      "weight": 1.0,
+      "tests": [
+        {
+          "test_name": "Pearson correlation (overconfidence, opportunity_evaluation)",
+          "weight": 1.0
+        }
+      ]
+    }
+  ]
+}
