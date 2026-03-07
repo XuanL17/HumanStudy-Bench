@@ -35,8 +35,13 @@ export default async function ContributePage() {
             Contribute
           </h1>
           <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-            Add a new human study to HumanStudy-Bench. The 12 existing studies are for reference.
+            Add a new study to HumanStudy-Bench.
           </p>
+          <div className="mt-6 mx-auto max-w-2xl rounded-xl border border-cyan-100 bg-cyan-50/40 px-6 py-5 text-sm leading-relaxed text-gray-700 space-y-1.5">
+            <p>HumanStudy-Bench is a non-profit and open-source platform.</p>
+            <p>We welcome collaborators from all backgrounds!</p>
+            <p>All accepted contributions will be acknowledged and credited.</p>
+          </div>
           {/* Section nav */}
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <a href="#studies" className="rounded-full border border-gray-200 px-4 py-1.5 text-sm font-medium text-gray-700 hover:border-cyan-300 hover:text-cyan-700 transition-colors">
@@ -55,7 +60,7 @@ export default async function ContributePage() {
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
                 </svg>
-                Step-by-step Tutorial
+                Step-by-step Tutorial &rarr;
               </span>
             </Link>
           </div>
@@ -220,6 +225,10 @@ export default async function ContributePage() {
             className="text-cyan-600 hover:underline"
           >
             GitHub
+          </a>
+          . For other inquiries, contact{" "}
+          <a href="mailto:xul049@ucsd.edu" className="text-cyan-600 hover:underline">
+            xul049@ucsd.edu
           </a>
           .
         </p>

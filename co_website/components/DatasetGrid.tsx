@@ -92,8 +92,11 @@ export default function DatasetGrid() {
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl font-serif">Study Dataset</h2>
           <p className="mt-4 text-lg leading-8 text-gray-600">
-            A curated collection of 12 foundational human-subject studies spanning individual cognition, strategic interaction, and social psychology, all with complete experimental materials and clearly specified statistical tests.
+            An initial curated collection of 12 foundational human-subject studies spanning individual cognition, strategic interaction, and social psychology, all with complete experimental materials and clearly specified statistical tests.
           </p>
+          <a href="/contribute" className="mt-3 inline-block text-lg font-medium text-indigo-600 hover:text-indigo-500">
+            Become a contributor &rarr;
+          </a>
         </div>
         <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-6 sm:mt-20 lg:max-w-none lg:grid-cols-2">
           {datasets.map((study) => (
