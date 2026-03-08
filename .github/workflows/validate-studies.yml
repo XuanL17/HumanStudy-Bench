@@ -1,7 +1,7 @@
 name: Validate studies
 on:
   pull_request:
-    branches: [dev, main]
+    branches: [main]
     paths:
       - "studies/**"
       - "scripts/build_studies_index.py"

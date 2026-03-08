@@ -1,7 +1,7 @@
 name: Sync studies index
 on:
   push:
-    branches: [dev, main]
+    branches: [main]
     paths:
       - "studies/**"
       - "scripts/build_studies_index.py"

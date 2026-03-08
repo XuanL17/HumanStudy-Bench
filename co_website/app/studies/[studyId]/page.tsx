@@ -70,7 +70,7 @@ export default async function StudyDetailPage({
             
             <div className="flex flex-wrap gap-4">
               <a
-                href={`https://github.com/AISmithLab/HumanStudy-Bench/tree/dev/studies/${study.study_id}`}
+                href={`https://github.com/AISmithLab/HumanStudy-Bench/tree/main/studies/${study.study_id}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-md bg-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-cyan-500 transition-colors"
